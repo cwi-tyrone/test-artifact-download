@@ -1,0 +1,30 @@
+name: Upload artifacts
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    env:
+      workingDirectory: ""
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Need all history to set the correct modified dates
+
+      - name: Build
+        # Install node packages and perform build. The build script should copy over all the 
+        # necessary files needed to run the application.
+        run: |
+          mkdir -p build
+          npm install --prod --ignore-scripts
+          npm prune --production
+          cp -R node_modules build/
+
+      - name: Upload build results
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: ${{ github.workspace }}/${{ env.workingDirectory }}/build
